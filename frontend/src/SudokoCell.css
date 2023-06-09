@@ -1,0 +1,17 @@
+.cell {
+    /* Box */
+    border: 2px solid blue;
+    width: 45px;
+    height: 45px;
+    margin: 9px;
+
+    /* Text */
+    color: black;
+    font-size: 36px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+}

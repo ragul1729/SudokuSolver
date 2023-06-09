@@ -1,157 +1,168 @@
 from collections import defaultdict
 
-def getInput():
-    for i in range(9):
-        row=list(map(str,input().split()))
-        sudokuGrid.append(row)
-    for i in range(9):
-        for j in range(9):
-            if sudokuGrid[i][j] !='.':
-                sudokuGrid[i][j]=int(sudokuGrid[i][j])
+class Sudokusolver:
 
-def fillRowDict():
-    for i in range(9):
-        for j in range(9):
-            if sudokuGrid[i][j] != '.':
-                rowDict[i].add(sudokuGrid[i][j])
-            else:
-                emptyCellsRow[i].add(j)
+    def getInput(self):
+        """
+        for i in range(9):
+            row=list(map(str,input().split()))
+            sudokuGrid.append(row)
+        """
+        for i in range(9):
+            for j in range(9):
+                if self.sudokuGrid[i][j] !=".":
+                    self.sudokuGrid[i][j]=int(self.sudokuGrid[i][j])
 
-def fillColDict():
-    for i in range(9):
-        for j in range(9):
-            if sudokuGrid[j][i] != '.':
-                colDict[i].add(sudokuGrid[j][i])
-            else:
-                emptyCellsCol[i].add(j)
+    def fillRowDict(self):
+        for i in range(9):
+            for j in range(9):
+                if self.sudokuGrid[i][j] != '.':
+                    self.rowDict[i].add(self.sudokuGrid[i][j])
+                else:
+                    self.emptyCellsRow[i].add(j)
 
-def getGridMap():
-    file1 = open(r"C:\Users\Sys\PycharmProjects\pythonProject\gridMap.txt", "r")
-    for line in file1.readlines():
-        ind=line.split(' ')
-        gridMap[int(ind[0])][int(ind[1])]=int(ind[2][0])
+    def fillColDict(self):
+        for i in range(9):
+            for j in range(9):
+                if self.sudokuGrid[j][i] != '.':
+                    self.colDict[i].add(self.sudokuGrid[j][i])
+                else:
+                    self.emptyCellsCol[i].add(j)
 
-def fillBlocks():
-    for i in range(9):
-        for j in range(9):
-            if sudokuGrid[i][j] != '.':
-                blocks[gridMap[i][j]].add(sudokuGrid[i][j])
-            else:
-                emptyCellsBlock[gridMap[i][j]].append((i,j))
+    def getGridMap(self):
+        file1 = open(r"C:\Users\Sys\PycharmProjects\pythonProject\gridMap.txt", "r")
+        for line in file1.readlines():
+            ind=line.split(' ')
+            self.gridMap[int(ind[0])][int(ind[1])]=int(ind[2][0])
+
+    def fillBlocks(self):
+        for i in range(9):
+            for j in range(9):
+                if self.sudokuGrid[i][j] != '.':
+                    self.blocks[self.gridMap[i][j]].add(self.sudokuGrid[i][j])
+                else:
+                    self.emptyCellsBlock[self.gridMap[i][j]].append((i,j))
 
 
-def fillPossibleAns():
-    for i in range(9):
-        for j in range(9):
-            if sudokuGrid[i][j]=='.':
-                for k in range(1,10):
-                    if k not in rowDict[i] and k not in colDict[j] and k not in blocks[gridMap[i][j]]:
-                        possibleAns[i][j].add(k)
-                key=str(i)+" "+str(j)
-                numPossibleAns[key]=len(possibleAns[i][j])
+    def fillPossibleAns(self):
+        for i in range(9):
+            for j in range(9):
+                if self.sudokuGrid[i][j]=='.':
+                    for k in range(1,10):
+                        if k not in self.rowDict[i] and k not in self.colDict[j] and k not in self.blocks[self.gridMap[i][j]]:
+                            self.possibleAns[i][j].add(k)
+                    key=str(i)+" "+str(j)
+                    self.numPossibleAns[key]=len(self.possibleAns[i][j])
 
-def findNextCell():
-    leastVal=min(numPossibleAns.values())
-    for k in numPossibleAns.keys():
-        if numPossibleAns[k]==leastVal:
-            return k
+    def findNextCell(self):
+        leastVal=min(self.numPossibleAns.values())
+        for k in self.numPossibleAns.keys():
+            if self.numPossibleAns[k]==leastVal:
+                return k
 
-def modifyDS(n,a,b,modifiedVal):
-    for j in emptyCellsRow[a]:
-        if n in possibleAns[a][j]:
-            modifiedVal[1].append(j)
-            possibleAns[a][j].remove(n)
-    for i in emptyCellsCol[b]:
-        if n in possibleAns[i][b]:
-            modifiedVal[2].append(i)
-            possibleAns[i][b].remove(n)
-    for (i,j) in emptyCellsBlock[gridMap[a][b]]:
-        if n in possibleAns[i][j]:
-            modifiedVal[3].append((i,j))
-            possibleAns[i][j].remove(n)
+    def modifyDS(self,n,a,b,modifiedVal):
+        for j in self.emptyCellsRow[a]:
+            if n in self.possibleAns[a][j]:
+                modifiedVal[1].append(j)
+                self.possibleAns[a][j].remove(n)
+        for i in self.emptyCellsCol[b]:
+            if n in self.possibleAns[i][b]:
+                modifiedVal[2].append(i)
+                self.possibleAns[i][b].remove(n)
+        for (i,j) in self.emptyCellsBlock[self.gridMap[a][b]]:
+            if n in self.possibleAns[i][j]:
+                modifiedVal[3].append((i,j))
+                self.possibleAns[i][j].remove(n)
 
-def undoModifyDS(n,a,b,modifiedVal):
-    for j in modifiedVal[1]:
-        possibleAns[a][j].add(n)
-    for i in modifiedVal[2]:
-        possibleAns[i][b].add(n)
-    for (i,j) in modifiedVal[3]:
-        possibleAns[i][j].add(n)
-    """
-    for j in emptyCellsRow[a]:
-        possibleAns[a][j].add(n)
-    for i in emptyCellsCol[b]:
-        possibleAns[i][b].add(n)
-    for (i,j) in emptyCellsBlock[gridMap[a][b]]:
-        possibleAns[i][j].add(n)
-    """
+    def undoModifyDS(self,n,a,b,modifiedVal):
+        for j in modifiedVal[1]:
+            self.possibleAns[a][j].add(n)
+        for i in modifiedVal[2]:
+            self.possibleAns[i][b].add(n)
+        for (i,j) in modifiedVal[3]:
+            self.possibleAns[i][j].add(n)
+        """
+        for j in emptyCellsRow[a]:
+            possibleAns[a][j].add(n)
+        for i in emptyCellsCol[b]:
+            possibleAns[i][b].add(n)
+        for (i,j) in emptyCellsBlock[gridMap[a][b]]:
+            possibleAns[i][j].add(n)
+        """
 
-def printSolvedGrid():
-    for row in solvedGrid:
-        for ele in row:
-            print(ele,end=' ')
-        print('')
+    def printSolvedGrid(self):
+        #print("Inside solvedgrid")
+        for row in self.solvedGrid:
+            for ele in row:
+                print(ele,end=' ')
+            print('')
 
-def solvePuzzle():
-    global solvedGrid
-    if len(numPossibleAns)==0:
-        return True
-    res=False
-    lowestPossCell = findNextCell()
-    val = numPossibleAns[lowestPossCell]
-    numPossibleAns.pop(lowestPossCell)
-    a, b = map(int, lowestPossCell.split())
-    emptyCellsRow[a].remove(b)
-    emptyCellsCol[b].remove(a)
-    emptyCellsBlock[gridMap[a][b]].remove((a,b))
-    for n in possibleAns[a][b]:
-        sudokuGrid[a][b]=n
-        #rowDict[a].add(n)
-        #colDict[b].add(n)
-        #blocks[gridMap[a][b]].add(n)
-        modifiedVal=defaultdict(list)
-        modifyDS(n,a,b,modifiedVal)
-        res=res|solvePuzzle()
+    def solvePuzzle(self):
+        #global solvedGrid
+        #print("Inside solvedgrid")
+        if len(self.numPossibleAns)==0:
+            return True
+        res=False
+        lowestPossCell = self.findNextCell()
+        val = self.numPossibleAns[lowestPossCell]
+        self.numPossibleAns.pop(lowestPossCell)
+        a, b = map(int, lowestPossCell.split())
+        self.emptyCellsRow[a].remove(b)
+        self.emptyCellsCol[b].remove(a)
+        self.emptyCellsBlock[self.gridMap[a][b]].remove((a,b))
+        for n in self.possibleAns[a][b]:
+            self.sudokuGrid[a][b]=n
+            #rowDict[a].add(n)
+            #colDict[b].add(n)
+            #blocks[gridMap[a][b]].add(n)
+            modifiedVal=defaultdict(list)
+            self.modifyDS(n,a,b,modifiedVal)
+            res=res|self.solvePuzzle()
+            if res:
+                break
+            self.undoModifyDS(n,a,b,modifiedVal)
         if res:
-            break
-        undoModifyDS(n,a,b,modifiedVal)
-    if res:
-        solvedGrid = sudokuGrid
-        return True
-    sudokuGrid[a][b]='.'
-    numPossibleAns[lowestPossCell]=val
-    emptyCellsRow[a].add(b)
-    emptyCellsCol[b].add(a)
-    emptyCellsBlock[gridMap[a][b]].append((a,b))
-    return False
+            self.solvedGrid = self.sudokuGrid
+            return True
+        self.sudokuGrid[a][b]='.'
+        self.numPossibleAns[lowestPossCell]=val
+        self.emptyCellsRow[a].add(b)
+        self.emptyCellsCol[b].add(a)
+        self.emptyCellsBlock[self.gridMap[a][b]].append((a,b))
+        return False
+
+    def __init__(self,grid):
+        self.sudokuGrid = grid
+        self.solvedGrid = None
+        self.rowDict = [set() for i in range(9)]
+        self.colDict = [set() for i in range(9)]
+        self.gridMap = [[0 for j in range(9)] for i in range(9)]
+        self.blocks = [set() for i in range(9)]
+        self.possibleAns = [[set() for j in range(9)] for i in range(9)]
+        self.emptyCellsRow = defaultdict(set)
+        self.emptyCellsCol = defaultdict(set)
+        self.emptyCellsBlock = defaultdict(list)
+        self.numPossibleAns = dict()
+
+    def funcOrder(self):
+        self.getInput()
+        self.fillRowDict()
+        self.fillColDict()
+        self.getGridMap()
+        self.fillBlocks()
+        self.fillPossibleAns()
+        print(self.rowDict)
+        print(self.colDict)
+        print(self.possibleAns)
+        print(self.numPossibleAns)
+        self.solvePuzzle()
+        self.printSolvedGrid()
 
 
 
-sudokuGrid=[]
-solvedGrid=None
-rowDict=[set() for i in range(9)]
-colDict=[set() for i in range(9)]
-gridMap=[[0 for j in range(9)] for i in range(9)]
-blocks=[set() for i in range(9)]
-possibleAns=[[set() for j in range(9)] for i in range(9)]
-emptyCellsRow=defaultdict(set)
-emptyCellsCol=defaultdict(set)
-emptyCellsBlock=defaultdict(list)
-numPossibleAns=dict()
-getInput()
-fillRowDict()
-fillColDict()
-getGridMap()
-fillBlocks()
-fillPossibleAns()
 
-print(rowDict)
-print(colDict)
-print(possibleAns)
-print(numPossibleAns)
 
-solvePuzzle()
-printSolvedGrid()
+
 
 
 
