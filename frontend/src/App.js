@@ -12,10 +12,81 @@ function App() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const Sboard = useRef();
+  var sudokuBoardState = [];
+  
+  function validateRows(board){
+    const set =new Set();
+    for(let i=0; i<9; i++){
+      set.clear();
+      for(let j=0; j<9; j++){
+        if(board[i][j] !== '.'){
+          if(set.has(board[i][j]))
+            return false;
+          set.add(board[i][j]);
+        }
+      }
+    }
+    return true;
+  }
 
-  // function ValidateGrid(){
-  //   Sboard.body.Children
-  // }
+  function validateColumns(board){
+    const set =new Set();
+    for(let j=0; j<9; j++){
+      set.clear();
+      for(let i=0; i<9; i++){
+        if(board[i][j] !== '.'){
+          if(set.has(board[i][j]))
+            return false;
+          set.add(board[i][j]);
+        }
+      }
+    }
+    return true;
+  }
+
+  function validateBlocks(board){
+    const set = new Set();
+    for(let i=0; i<3; i++){
+      for(let j=0; j<3 ;j++){
+        set.clear();
+        for(let rw=i*3; rw<(i+1)*3; rw++){
+          for(let cl=j*3; cl<(j+1)*3; cl++){
+            if(board[rw][cl] !== '.'){
+              if(set.has(board[rw][cl]))
+                return false;
+              set.add(board[rw][cl]);
+            }
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  function Validate(e){
+    const inputs = Sboard.current.children;
+    const boardState={};
+    sudokuBoardState = [];
+    for(const input of inputs){
+      boardState[input.id] = input.value;
+    }
+    for(let i=0; i<9; i++){
+      var row = [];
+      for(let j=0; j<9; j++){
+        let inputID = i*9+j+1;
+        if(boardState[inputID] === '')
+          row.push('.');
+        else
+          row.push(boardState[inputID]);
+      }
+      sudokuBoardState.push(row);
+    }
+    console.log(boardState);
+    console.log(sudokuBoardState);
+
+    const isValidSudoku = validateRows(sudokuBoardState) && validateColumns(sudokuBoardState) && validateBlocks(sudokuBoardState);
+    console.log(isValidSudoku);
+  }
 
   function ValidateAndSend(){
     const sudokuBoard = [['.', '.', '.', '7', '.', '3', '1', '.', '.'],
@@ -32,7 +103,7 @@ function App() {
       .post(baseURL ,{
         body: JSON.stringify(sudokuBoard)})
       .then((response) => {
-
+          
       });
 //     const resp =  fetch(baseURL , {
 //   method : "POST",
@@ -67,7 +138,7 @@ function App() {
       <h4 id='title'>SUDOKU SOLVER</h4>
       <Board ref={Sboard}/>
       <div>
-        <Button variant="contained" color="success" id="btn" onClick={ValidateAndSend}>SOLVE</Button>
+        <Button variant="contained" color="success" id="btn" onClick={Validate}>SOLVE</Button>
       </div>
       {modalOpen && <Modal setOpenModal={setModalOpen} />}
     </div>
