@@ -86,55 +86,43 @@ function App() {
 
     const isValidSudoku = validateRows(sudokuBoardState) && validateColumns(sudokuBoardState) && validateBlocks(sudokuBoardState);
     console.log(isValidSudoku);
-  }
 
-  function ValidateAndSend(){
-    const sudokuBoard = [['.', '.', '.', '7', '.', '3', '1', '.', '.'],
-                         ['.', '5', '.', '4', '9', '.', '8', '3', '.'],
-                         ['.', '9', '.', '.', '1', '8', '7', '4', '5'],
-                         ['1', '3', '.', '.', '4', '9', '.', '.', '.'],
-                         ['9', '.', '.', '8', '.', '.', '6', '.', '3'],
-                         ['2', '.', '6', '.', '.', '1', '9', '8', '.'],
-                         ['5', '.', '4', '9', '6', '2', '3', '.', '.'],
-                         ['.', '.', '.', '.', '8', '.', '.', '2', '.'],
-                         ['.', '2', '.', '.', '.', '4', '5', '.', '.']
-                        ];
-    axios
+    if(isValidSudoku){
+      axios
       .post(baseURL ,{
-        body: JSON.stringify(sudokuBoard)})
+        body: JSON.stringify(sudokuBoardState)
+      })
       .then((response) => {
-          
+          console.log(response["data"]["SolvedGrid"]);
+          setSolvedGridonUI(response["data"]["SolvedGrid"]);
       });
-//     const resp =  fetch(baseURL , {
-//   method : "POST",
-//   mode: 'cors',
-//   headers: {
-//     'Content-Type': 'application/json'
-//   },
-//   body: "hjbcdghjdghjegfhjg"
-// });
+    }
+    else{
+      setModalOpen(true);
+    }
   }
 
-  // function showModal(){
-  //     setModalOpen(true);
-  // }
+  function setSolvedGridonUI(solvedGrid){
+    const boardState={};
+    for(let i=0; i<9; i++){
+      for(let j=0; j<9; j++){
+        let inputID = i*9+j+1;
+        boardState[inputID] = solvedGrid[i][j];
+      }
+    }
+    const inputs = Sboard.current.children;
+    for(const input of inputs){
+      if(input.value === ''){
+        input.style.backgroundColor = "lightgreen";
+      }
+      input.value = boardState[input.id];
+    }
+  }
+
+ 
 
   return (
     <div className="App">
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
       <h4 id='title'>SUDOKU SOLVER</h4>
       <Board ref={Sboard}/>
       <div>
